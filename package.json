@@ -1,7 +1,7 @@
 {
   "name": "express-class-server",
   "version": "1.0.0",
-  "main": "dist/server.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "yarn run tsc --sourceMap false --removeComments true",
     "build-debug": "yarn run tsc --build",
