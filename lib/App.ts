@@ -15,6 +15,22 @@ export default class App {
 
 	start() {
 		this.listen();
+
+		process
+			.on('SIGTERM', () => {
+				console.debug('SIGTERM');
+				this.server?.close();
+			})
+			.on('SIGINT', () => {
+				console.debug('SIGINT');
+				this.server?.close();
+			})
+			.on('SIGSTOP', () => {
+				console.debug('SIGSTOP');
+			})
+			.on('SIGKILL', () => {
+				console.debug('SIGKILL');
+			});
 	}
 
 	protected init(routers: routerInfo[]) {

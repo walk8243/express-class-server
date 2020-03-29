@@ -3,7 +3,9 @@ import { App } from '../';
 const app = new App([
 	{
 		handler: (req, res, next) => {
-			res.send({ result: 'express-class-server' });
+			setTimeout(() => {
+				res.send({ result: 'express-class-server' });
+			}, 5 * 1000);
 		},
 	},
 ]);
