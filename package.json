@@ -1,0 +1,17 @@
+{
+  "name": "express-class-server",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "yarn run tsc --sourceMap false --removeComments true",
+    "build-debug": "yarn run tsc --build",
+    "start": "node ."
+  },
+  "repository": "git@github.com:walk8243/express-class-server.git",
+  "author": "walk8243 <walk8243@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^13.9.5",
+    "typescript": "^3.8.3"
+  }
+}
