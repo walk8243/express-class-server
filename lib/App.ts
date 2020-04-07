@@ -1,5 +1,7 @@
 import * as http from 'http';
 import * as net from 'net';
+import cluster from 'cluster';
+import * as os from 'os';
 import express from 'express';
 import * as expressCore from 'express-serve-static-core';
 import bodyParser from 'body-parser';
@@ -7,6 +9,7 @@ import bodyParser from 'body-parser';
 export default class App {
 	private app: expressCore.Express;
 	private server?: http.Server;
+	private worker?: cluster.Worker[];
 
 	constructor(routers: routerInfo[]) {
 		this.app = express();
@@ -14,22 +17,21 @@ export default class App {
 	}
 
 	start() {
-		this.listen();
+		if(cluster.isMaster) {
+			this.worker = [...Array(os.cpus().length)].map((_) => {
+				return cluster.fork();
+			});
+			this.initGracefulShutdown();
+		} else if(cluster.isWorker) {
+			this.listen();
+		}
 
-		process
-			.on('SIGTERM', () => {
-				console.debug('SIGTERM');
-				this.server?.close();
+		cluster
+			.on('disconnect', (worker) => {
+				console.log(worker);
 			})
-			.on('SIGINT', () => {
-				console.debug('SIGINT');
-				this.server?.close();
-			})
-			.on('SIGSTOP', () => {
-				console.debug('SIGSTOP');
-			})
-			.on('SIGKILL', () => {
-				console.debug('SIGKILL');
+			.on('exit', (worker, code, signal) => {
+				console.log(worker, code, signal);
 			});
 	}
 
@@ -64,16 +66,39 @@ export default class App {
 			.on('listening', () => {
 				const address = this.server!.address() as net.AddressInfo;
 				if(address.family == 'IPv4') {
-					console.log('access to', `localhost:${address.port}`, '.');
+					console.log('access to', `http://localhost:${address.port}`, '.');
 				} else if(address.family == 'IPv6') {
-					console.log('access to', `[::1]:${address.port}`, '.');
+					console.log('access to', `http://[::1]:${address.port}`, '.');
 				} else {
 					console.log('listening');
 				}
 			})
+			.on('close', () => {
+				console.log('server closed');
+			})
 			.on('error', (error) => {
+				console.log('error', 'object');
 				console.error(error);
 			});
+	}
+
+	private initGracefulShutdown() {
+		process
+			.on('SIGTERM', () => {
+				console.debug('SIGTERM');
+				this.execGracefulShutdown();
+			})
+			.on('SIGINT', () => {
+				console.debug('SIGINT');
+				this.execGracefulShutdown();
+			});
+	}
+	private execGracefulShutdown() {
+		if(cluster.isMaster) {
+			this.worker
+				?.filter((worker) => worker.isConnected)
+				.forEach((worker) => worker.disconnect());
+		}
 	}
 }
 
