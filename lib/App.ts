@@ -20,14 +20,6 @@ export default class App {
 				return cluster.fork();
 			});
 			this.initGracefulShutdown();
-		} else if(cluster.isWorker) {
-			this.app = express();
-			this.init(routers);
-		}
-	}
-
-	start() {
-		if(cluster.isMaster) {
 			cluster
 				.on('disconnect', (worker) => {
 					console.log(worker);
@@ -36,6 +28,13 @@ export default class App {
 					console.log(worker, code, signal);
 				});
 		} else if(cluster.isWorker) {
+			this.app = express();
+			this.init(routers);
+		}
+	}
+
+	start() {
+		if(cluster.isWorker) {
 			this.listen();
 		}
 	}
