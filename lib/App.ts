@@ -7,32 +7,37 @@ import * as expressCore from 'express-serve-static-core';
 import bodyParser from 'body-parser';
 
 export default class App {
-	private app: expressCore.Express;
-	private server?: http.Server;
+	// Master
 	private worker?: cluster.Worker[];
 
-	constructor(routers: routerInfo[]) {
-		this.app = express();
-		this.init(routers);
-	}
+	// Worker
+	private app: expressCore.Express | null = null;
+	private server?: http.Server;
 
-	start() {
+	constructor(routers: routerInfo[]) {
 		if(cluster.isMaster) {
 			this.worker = [...Array(os.cpus().length)].map((_) => {
 				return cluster.fork();
 			});
 			this.initGracefulShutdown();
 		} else if(cluster.isWorker) {
+			this.app = express();
+			this.init(routers);
+		}
+	}
+
+	start() {
+		if(cluster.isMaster) {
+			cluster
+				.on('disconnect', (worker) => {
+					console.log(worker);
+				})
+				.on('exit', (worker, code, signal) => {
+					console.log(worker, code, signal);
+				});
+		} else if(cluster.isWorker) {
 			this.listen();
 		}
-
-		cluster
-			.on('disconnect', (worker) => {
-				console.log(worker);
-			})
-			.on('exit', (worker, code, signal) => {
-				console.log(worker, code, signal);
-			});
 	}
 
 	protected init(routers: routerInfo[]) {
@@ -42,16 +47,19 @@ export default class App {
 	}
 
 	protected setRouters(routers: routerInfo[]) {
+		if(this.app == null) return;
 		routers.forEach((router) => {
-			this.app[router.method || 'all'](router.method || '/', router.handler);
+			this.app![router.method || 'all'](router.path || '/', router.handler);
 		});
 	}
 
 	private before() {
+		if(this.app == null) return;
 		this.app.use(bodyParser.json());
 		this.app.use(bodyParser.urlencoded({ extended: false }));
 	}
 	private after() {
+		if(this.app == null) return;
 		this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
 			res.sendStatus(400);
 		});
@@ -61,6 +69,7 @@ export default class App {
 	}
 
 	private listen() {
+		if(this.app == null) return;
 		this.server = this.app.listen(3000);
 		this.server
 			.on('listening', () => {
