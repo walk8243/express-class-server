@@ -1,4 +1,4 @@
-import Cluster from './Cluster';
+import Cluster, { ClusterConfig } from './Cluster';
 import * as http from 'http';
 import * as net from 'net';
 import express from 'express';
@@ -9,8 +9,8 @@ export default class Worker extends Cluster {
 	private app: Express;
 	private server: http.Server | null = null;
 
-	constructor(routers: routerInfo[]) {
-		super();
+	constructor(routers: routerInfo[], config: WorkerConfig) {
+		super(config);
 		this.clusterType = 'Worker';
 
 		this.app = express();
@@ -47,7 +47,7 @@ export default class Worker extends Cluster {
 	}
 
 	private listen() {
-		this.server = this.app.listen(3000);
+		this.server = this.app.listen((this.config as WorkerConfig).port);
 		this.server
 			.on('listening', () => {
 				const address = this.server!.address() as net.AddressInfo;
@@ -74,3 +74,6 @@ export type routerInfo = {
 	path?: string,
 	handler: express.RequestHandler,
 };
+export type WorkerConfig = {
+	port: number,
+} & ClusterConfig;

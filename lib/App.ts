@@ -10,11 +10,11 @@ export default class App {
 
 	constructor(routers: routerInfo[]) {
 		if(cluster.isMaster) {
-			this.cluster = new Master(os.cpus().length);
+			this.cluster = new Master({ clusterNum: os.cpus().length });
 		} else if(cluster.isWorker) {
-			this.cluster = new Worker(routers);
+			this.cluster = new Worker(routers, { port: 3000 });
 		} else {
-			this.cluster = new Cluster();
+			this.cluster = new Cluster({});
 		}
 	}
 

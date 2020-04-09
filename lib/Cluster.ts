@@ -1,7 +1,10 @@
 export default class Cluster {
 	protected clusterType: ClusterType | null = null;
+	protected config: ClusterConfig;
 
-	constructor() {}
+	constructor(config: ClusterConfig) {
+		this.config = config;
+	}
 
 	start() {}
 
@@ -14,3 +17,4 @@ export default class Cluster {
 }
 
 export type ClusterType = 'Master' | 'Worker';
+export type ClusterConfig = {};

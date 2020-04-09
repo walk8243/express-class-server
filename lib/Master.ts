@@ -1,15 +1,15 @@
 import cluster from 'cluster';
-import Cluster from './Cluster';
+import Cluster, { ClusterConfig } from './Cluster';
 
 export default class Master extends Cluster {
 	workers: cluster.Worker[];
 
-	constructor(clusterNum: number) {
-		super();
+	constructor(config: MasterConfig) {
+		super(config);
 		this.clusterType = 'Master';
 		console.debug('ProcessID:', process.pid);
 
-		this.workers = [...Array(clusterNum)].map((_) => {
+		this.workers = [...Array((this.config as MasterConfig).clusterNum)].map((_) => {
 			return cluster.fork();
 		});
 
@@ -45,3 +45,7 @@ export default class Master extends Cluster {
 		return this.workers;
 	}
 }
+
+export type MasterConfig = {
+	clusterNum: number,
+} & ClusterConfig;
