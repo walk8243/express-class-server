@@ -29,7 +29,7 @@ export default class Worker extends Cluster<WorkerConfig> {
 
 	private setRouters(routers: routerInfo[]) {
 		routers.forEach((router) => {
-			this.app![router.method || 'all'](router.path || '/', router.handler);
+			this.app[router.method || 'all'](router.path || '/', router.handler);
 		});
 	}
 
