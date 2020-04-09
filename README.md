@@ -7,6 +7,8 @@
 
 ```.json
 {
+	"clusterNum": "CPU数",
+	"port": "3000"
 }
 ```
 
@@ -20,7 +22,7 @@
 	"type": "node",
 	"request": "launch",
 	"name": "Launch Program",
-	"program": "${workspaceFolder}\\example\\index.js",
+	"program": "${workspaceFolder}/example/index.js",
 	"autoAttachChildProcesses": true,
 	"console": "internalConsole"
 }

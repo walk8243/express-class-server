@@ -10,9 +10,13 @@ export default class App {
 
 	constructor(routers: routerInfo[]) {
 		if(cluster.isMaster) {
-			this.cluster = new Master({ clusterNum: os.cpus().length });
+			this.cluster = new Master({
+				clusterNum: this.getNumberFromProcessEnv('clusterNum', os.cpus().length),
+			});
 		} else if(cluster.isWorker) {
-			this.cluster = new Worker(routers, { port: 3000 });
+			this.cluster = new Worker(routers, {
+				port: this.getNumberFromProcessEnv('port', 3000),
+			});
 		} else {
 			this.cluster = new Cluster({});
 		}
@@ -21,4 +25,19 @@ export default class App {
 	start() {
 		this.cluster.start();
 	}
+
+	private getNumberFromProcessEnv(key: keyof processEnvType, defaultValue: number): number {
+		const value = Number(process.env[key]);
+		if(Number.isNaN(value)
+			|| value < 1) {
+			return defaultValue;
+		} else {
+			return Math.floor(value);
+		}
+	}
 }
+
+export type processEnvType = {
+	clusterNum?: string,
+	port?: string,
+};
