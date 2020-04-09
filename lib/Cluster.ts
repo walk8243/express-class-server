@@ -1,8 +1,8 @@
-export default class Cluster {
+export default class Cluster<C extends ClusterConfig = ClusterConfig> {
 	protected clusterType: ClusterType | null = null;
-	protected config: ClusterConfig;
+	protected config: C;
 
-	constructor(config: ClusterConfig) {
+	constructor(config: C) {
 		this.config = config;
 	}
 
@@ -17,4 +17,4 @@ export default class Cluster {
 }
 
 export type ClusterType = 'Master' | 'Worker';
-export type ClusterConfig = {};
+export type ClusterConfig = {} & object;

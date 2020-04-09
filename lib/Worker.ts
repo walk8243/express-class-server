@@ -5,7 +5,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { Express } from 'express-serve-static-core';
 
-export default class Worker extends Cluster {
+export default class Worker extends Cluster<WorkerConfig> {
 	private app: Express;
 	private server: http.Server | null = null;
 
