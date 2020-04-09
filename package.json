@@ -6,7 +6,8 @@
     "build": "yarn run tsc --sourceMap false --removeComments true",
     "build-debug": "yarn run tsc --build",
     "clean": "yarn run tsc --build --clean",
-    "start": "node ./example/index.js"
+    "example:start": "node ./example/index.js",
+    "start": "echo This package does not have an executable because this package is a library."
   },
   "repository": "git@github.com:walk8243/express-class-server.git",
   "author": "walk8243 <walk8243@gmail.com>",
@@ -16,8 +17,8 @@
     "express": "^4.17.1"
   },
   "devDependencies": {
-    "@types/express": "^4.17.3",
-    "@types/node": "^13.9.5",
+    "@types/express": "^4.17.5",
+    "@types/node": "^13.11.1",
     "typescript": "^3.8.3"
   }
 }
