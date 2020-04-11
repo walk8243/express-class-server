@@ -9,16 +9,16 @@ export default class App {
 	private cluster: Cluster;
 
 	constructor(routers: routerInfo[]) {
-		if(cluster.isMaster) {
+		if(cluster.isMaster && (process.env['CLUSTER_MODE'] == undefined || process.env['CLUSTER_MODE'].toLowerCase() != 'false')) {
 			this.cluster = new Master({
-				clusterNum: this.getNumberFromProcessEnv('clusterNum', os.cpus().length),
+				clusterNum: this.getNumberFromProcessEnv('CLUSTER_NUM', os.cpus().length),
 			});
-		} else if(cluster.isWorker) {
-			this.cluster = new Worker(routers, {
-				port: this.getNumberFromProcessEnv('port', 3000),
-			});
-		} else {
+		} else if(!(cluster.isMaster || cluster.isWorker)) {
 			this.cluster = new Cluster({});
+		} else {
+			this.cluster = new Worker(routers, {
+				port: this.getNumberFromProcessEnv('PORT', 3000),
+			});
 		}
 	}
 
@@ -38,6 +38,7 @@ export default class App {
 }
 
 export type processEnvType = {
-	clusterNum?: string,
-	port?: string,
+	CLUSTER_MODE?: string,
+	CLUSTER_NUM?: string,
+	PORT?: string,
 };

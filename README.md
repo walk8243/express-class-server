@@ -7,8 +7,9 @@
 
 ```.json
 {
-	"clusterNum": "CPU数",
-	"port": "3000"
+	"CLUSTER_MODE": "true", // 起動がクラスタモードかシングルモードか
+	"CLUSTER_NUM": "CPU数", // クラスタ数
+	"PORT": "3000" // サーバポート
 }
 ```
 
