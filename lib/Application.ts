@@ -2,10 +2,11 @@ import cluster from 'cluster';
 import * as os from 'os';
 import Cluster from './Cluster';
 import Master from './Master';
-import Worker, { routerInfo } from './Worker';
-export { routerInfo } from './Worker';
+import Worker from './Worker';
+import { routerInfo } from './Server';
+export { routerInfo } from './Server';
 
-export default class App {
+export default class Application {
 	private cluster: Cluster;
 
 	constructor(routers: routerInfo[]) {
