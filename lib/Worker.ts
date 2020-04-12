@@ -21,6 +21,10 @@ export default class Worker extends Cluster<WorkerConfig> {
 		this.listen();
 	}
 
+	close() {
+		this.server?.close();
+	}
+
 	private init(routers: routerInfo[]) {
 		this.before();
 		this.setRouters(routers);

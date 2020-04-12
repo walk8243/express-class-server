@@ -7,13 +7,10 @@ export default class Master extends Cluster<MasterConfig> {
 	constructor(config: MasterConfig) {
 		super(config);
 		this.clusterType = 'Master';
-		console.debug('ProcessID:', process.pid);
 
 		this.workers = [...Array(this.config.clusterNum)].map((_) => {
 			return cluster.fork();
 		});
-
-		this.initGracefulShutdown();
 
 		cluster
 			.on('disconnect', (worker) => {
@@ -24,18 +21,7 @@ export default class Master extends Cluster<MasterConfig> {
 			});
 	}
 
-	private initGracefulShutdown() {
-		process
-			.on('SIGTERM', () => {
-				console.debug('SIGTERM');
-				this.execGracefulShutdown();
-			})
-			.on('SIGINT', () => {
-				console.debug('SIGINT');
-				this.execGracefulShutdown();
-			});
-	}
-	private execGracefulShutdown() {
+	close() {
 		this.workers
 			.filter((worker) => worker.isConnected)
 			.forEach((worker) => worker.disconnect());

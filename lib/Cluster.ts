@@ -8,6 +8,8 @@ export default class Cluster<C extends ClusterConfig = ClusterConfig> {
 
 	start() {}
 
+	close() {}
+
 	isMaster() {
 		return this.clusterType == 'Master';
 	}

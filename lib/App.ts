@@ -9,21 +9,41 @@ export default class App {
 	private cluster: Cluster;
 
 	constructor(routers: routerInfo[]) {
-		if(cluster.isMaster && (process.env['CLUSTER_MODE'] == undefined || process.env['CLUSTER_MODE'].toLowerCase() != 'false')) {
-			this.cluster = new Master({
-				clusterNum: this.getNumberFromProcessEnv('CLUSTER_NUM', os.cpus().length),
-			});
-		} else if(!(cluster.isMaster || cluster.isWorker)) {
-			this.cluster = new Cluster({});
-		} else {
+		if(cluster.isMaster) {
+			console.debug('ProcessID:', process.pid);
+			if(process.env['CLUSTER_MODE']?.toLowerCase() == 'false') {
+				this.cluster = new Worker(routers, {
+					port: this.getNumberFromProcessEnv('PORT', 3000),
+				});
+			} else {
+				this.cluster = new Master({
+					clusterNum: this.getNumberFromProcessEnv('CLUSTER_NUM', os.cpus().length),
+				});
+			}
+			this.initGracefulShutdown();
+		} else if(cluster.isWorker) {
 			this.cluster = new Worker(routers, {
 				port: this.getNumberFromProcessEnv('PORT', 3000),
 			});
+		} else {
+			this.cluster = new Cluster({});
 		}
 	}
 
 	start() {
 		this.cluster.start();
+	}
+
+	private initGracefulShutdown() {
+		process
+			.on('SIGTERM', () => {
+				console.debug('SIGTERM');
+				this.cluster.close();
+			})
+			.on('SIGINT', () => {
+				console.debug('SIGINT');
+				this.cluster.close();
+			});
 	}
 
 	private getNumberFromProcessEnv(key: keyof processEnvType, defaultValue: number): number {
