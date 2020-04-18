@@ -30,7 +30,6 @@ export default class Server {
 				console.log('server closed');
 			})
 			.on('error', (error) => {
-				console.log('error', 'object');
 				console.error(error);
 			});
 	}

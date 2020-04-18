@@ -14,17 +14,25 @@ export default class Master extends Cluster<MasterConfig> {
 
 		cluster
 			.on('disconnect', (worker) => {
-				console.log(worker);
+				console.debug(worker);
+				const number = this.workers.indexOf(worker);
+				console.debug('Worker number:', number);
+				this.workers.splice(number, 1);
 			})
 			.on('exit', (worker, code, signal) => {
-				console.log(worker, code, signal);
+				console.debug(worker, code, signal);
+				this.workers.push(cluster.fork());
 			});
 	}
 
 	close() {
-		this.workers
-			.filter((worker) => worker.isConnected)
-			.forEach((worker) => worker.disconnect());
+		cluster.removeAllListeners('disconnect');
+		cluster.removeAllListeners('exit');
+		setImmediate(() => {
+			this.workers
+				.filter((worker) => worker.isConnected)
+				.forEach((worker) => worker.disconnect());
+		});
 	}
 
 	getWorkers() {
